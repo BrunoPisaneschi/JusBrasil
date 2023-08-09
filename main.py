@@ -5,6 +5,7 @@ import asyncio
 from fastapi import FastAPI, Depends
 from fastapi.responses import RedirectResponse, JSONResponse
 
+from api.exceptions import InvalidParameterError
 from api.schemas.input import ConsultaProcessoInput, StatusSolicitacaoInput
 from api.schemas.output import StatusSolicitacaoOutput, ConsultaProcessoOutput
 from api.services.process_handler import process_request
@@ -20,6 +21,14 @@ app.add_event_handler("shutdown", shutdown)
 @app.get("/", include_in_schema=False)
 def read_root():
     return RedirectResponse(url="/docs")
+
+
+@app.exception_handler(InvalidParameterError)
+def handle_invalid_parameter_error(request, exc):
+    return JSONResponse(
+        status_code=422,
+        content={"message": str(exc)},
+    )
 
 
 @app.post("/consulta-processo", response_model=ConsultaProcessoOutput)
