@@ -161,5 +161,4 @@ cython_debug/
 *.txt
 *.html
 *.xml
-
 results/
