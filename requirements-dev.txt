@@ -1,0 +1,8 @@
+-r requirements.txt
+
+# P
+pytest-asyncio==0.21.1
+
+# R
+robotframework==6.1.1
+robotframework-requests==0.9.5

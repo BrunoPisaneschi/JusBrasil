@@ -1,9 +1,17 @@
+from logging import basicConfig, getLogger, INFO
+
 from re import search
 
 from httpx import AsyncClient
 
 from api.exceptions import InvalidParameterError
 from crawler.default.data_extractor import DataExtractor
+
+# Configurando o log
+basicConfig(filename='app.txt', 
+            level=INFO,
+            format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+logger = getLogger(__name__)
 
 
 class FirstInstance:
@@ -12,8 +20,12 @@ class FirstInstance:
         self.codigo_tj = codigo_tj
 
     async def capturar_dados(self, numero_processo):
+        logger.info("Iniciando captura dados primeira instancia")
         processo_codigo = await self._capturar_numero_processo_codigo(numero_processo=numero_processo)
+        if not processo_codigo:
+            logger.info("Número de processo não encontrado")
         html = await self._consultar_processo(processo_codigo=processo_codigo, numero_processo=numero_processo)
+        logger.info("Extraindo dados primeira instancia")
         return self._extrair_dados(html=html)
 
     async def _capturar_numero_processo_codigo(self, numero_processo):

@@ -1,3 +1,4 @@
+from logging import basicConfig, getLogger, DEBUG
 from json import dumps, loads
 from uuid import uuid4
 import asyncio
@@ -11,6 +12,12 @@ from api.schemas.output import StatusSolicitacaoOutput, ConsultaProcessoOutput, 
     StatusSolicitacaoResponses
 from api.services.process_handler import process_request
 from database.service import startup, shutdown, set_data, get_data
+
+# Configurando o log
+basicConfig(filename='app.txt',
+            level=DEBUG,
+            format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+logger = getLogger(__name__)
 
 app = FastAPI(
     title="JusBrasil",
@@ -26,6 +33,7 @@ app.add_event_handler("shutdown", shutdown)
 # Redirecionar a página inicial para /docs
 @app.get("/", include_in_schema=False)
 def read_root():
+    logger.info("Raiz acessada")
     return RedirectResponse(url="/docs")
 
 
@@ -43,6 +51,7 @@ async def consulta_processo(payload: ConsultaProcessoInput = Depends()):
     solicitacao_id = str(uuid4())
 
     # Armazene os detalhes da consulta no Redis
+    logger.info("Solicitação recebida, dados salvos no banco")
     await set_data(key=solicitacao_id, value=dumps({
         "numero_processo": payload.numero_processo,
         "sigla_tribunal": payload.sigla_tribunal,
@@ -67,6 +76,7 @@ async def status_solicitacao(payload: StatusSolicitacaoInput = Depends()):
 
     # Verificar se o número da solicitação existe
     if dados_solicitacao is None:
+        logger.info(f"Solicitação {payload.numero_solicitacao} não encontrada")
         return JSONResponse({"error": "Solicitação não encontrada"}, status_code=404)
 
     response = loads(dados_solicitacao.decode("utf-8"))
