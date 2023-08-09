@@ -30,7 +30,7 @@ def payload():
 @pytest.mark.asyncio
 async def test_status_solicitacao_success(client, solicitacao_id, payload):
     with patch('database.service.set_data', new_callable=AsyncMock, return_value=None), \
-            patch('main.get_data', new_callable=AsyncMock, return_value=dumps(payload).encode("utf-8")):
+            patch('main.RedisConnection.get_data', new_callable=AsyncMock, return_value=dumps(payload).encode("utf-8")):
         response = client.get(f"/status-solicitacao/{solicitacao_id}")
         assert response.status_code == 200
         assert "numero_processo" in response.json()
@@ -40,7 +40,7 @@ async def test_status_solicitacao_success(client, solicitacao_id, payload):
 
 @pytest.mark.asyncio
 async def test_status_solicitacao_not_found(client):
-    with patch('database.service.get_data', new_callable=AsyncMock, return_value=None), \
-            patch('main.get_data', new_callable=AsyncMock, return_value=None):
+    with patch('database.service.RedisConnection.get_data', new_callable=AsyncMock, return_value=None), \
+            patch('main.RedisConnection.get_data', new_callable=AsyncMock, return_value=None):
         response = client.get(f"/status-solicitacao/{str(uuid4())}")
         assert response.status_code == 404

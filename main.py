@@ -11,7 +11,7 @@ from api.schemas.input import ConsultaProcessoInput, StatusSolicitacaoInput
 from api.schemas.output import StatusSolicitacaoOutput, ConsultaProcessoOutput, ConsultaProcessoResponses, \
     StatusSolicitacaoResponses
 from api.services.process_handler import process_request
-from database.service import startup, shutdown, set_data, get_data
+from database.service import RedisConnection
 
 # Configuração de log
 basicConfig(filename='app.txt',
@@ -26,10 +26,6 @@ app = FastAPI(
     version="1.0.0",
     redoc_url=None
 )
-
-# Registrando funções de inicialização e desligamento
-app.add_event_handler("startup", startup)
-app.add_event_handler("shutdown", shutdown)
 
 
 @app.get("/", include_in_schema=False)
@@ -62,11 +58,14 @@ async def consulta_processo(payload: ConsultaProcessoInput = Depends()):
 
     # Armazena os detalhes da consulta no banco de dados (ex. Redis)
     logger.info("Solicitação recebida, dados salvos no banco")
-    await set_data(key=solicitacao_id, value=dumps({
+    redis = RedisConnection()
+    await redis.startup()
+    await redis.set_data(key=solicitacao_id, value=dumps({
         "numero_processo": payload.numero_processo,
         "sigla_tribunal": payload.sigla_tribunal,
         "status": "Na Fila"
     }))
+    await redis.shutdown()
 
     response = {"numero_solicitacao": solicitacao_id}
 
@@ -86,8 +85,10 @@ async def status_solicitacao(payload: StatusSolicitacaoInput = Depends()):
     """
     Recupera o status de uma solicitação de consulta de processo.
     """
-    dados_solicitacao = await get_data(payload.numero_solicitacao)
-
+    redis = RedisConnection()
+    await redis.startup()
+    dados_solicitacao = await redis.get_data(payload.numero_solicitacao)
+    await redis.shutdown()
     # Verifica se o número da solicitação existe
     if dados_solicitacao is None:
         logger.info(f"Solicitação {payload.numero_solicitacao} não encontrada")

@@ -2,7 +2,7 @@ from logging import basicConfig, getLogger, INFO
 from importlib import import_module
 from json import dumps, loads
 from api.schemas.output import StatusSolicitacaoOutput
-from database.service import get_data, set_data
+from database.service import RedisConnection
 
 # Configurando o log
 basicConfig(filename='app.txt',
@@ -21,7 +21,10 @@ async def process_request(solicitacao_id: str):
     """
 
     # Obtendo dados da solicitação do banco de dados
-    dados_solicitacao = await get_data(solicitacao_id)
+    redis = RedisConnection()
+    await redis.startup()
+    dados_solicitacao = await redis.get_data(solicitacao_id)
+    await redis.shutdown()
     dict_dados_solicitacao = loads(dados_solicitacao)
 
     numero_processo = dict_dados_solicitacao.get("numero_processo")
@@ -30,11 +33,15 @@ async def process_request(solicitacao_id: str):
     logger.info("Dados capturados, iniciando processo de captura")
 
     # Atualizando o status da solicitação para "Em processamento"
-    await set_data(key=solicitacao_id, value=dumps({
+    redis = RedisConnection()
+
+    await redis.startup()
+    await redis.set_data(key=solicitacao_id, value=dumps({
         "numero_processo": numero_processo,
         "sigla_tribunal": sigla_tribunal,
         "status": "Em processamento"
     }))
+    await redis.shutdown()
 
     # Importando o módulo específico do tribunal
     module = import_module(f"crawler.{sigla_tribunal.lower()}.main")
@@ -46,10 +53,14 @@ async def process_request(solicitacao_id: str):
     dados_capturados = await tj().capturar_dados(numero_processo=dict_dados_solicitacao.get("numero_processo"))
 
     logger.info("Dados capturados, encerrando solicitação.")
-    print("Dados capturados, encerrando solicitação.")
 
     # Atualizando o banco de dados com os dados capturados
-    await set_data(
+    redis = RedisConnection()
+
+    await redis.startup()
+    await redis.set_data(
         key=solicitacao_id,
         value=dumps(StatusSolicitacaoOutput.model_validate(dados_capturados).model_dump(exclude_none=True))
     )
+    await redis.shutdown()
+    logger.info(f"Dados atualizados no banco para a solicitação {solicitacao_id}")
