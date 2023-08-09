@@ -92,7 +92,7 @@ class SecondInstance:
                 if 'Não existem informações disponíveis' in response.text:
                     return None
                 else:
-                    return None
+                    logger.error("Situação inesperada na execução")
 
         return processo_codigo
 

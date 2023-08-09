@@ -2,7 +2,6 @@
 tests/
 .idea
 README.md
-*.txt
 *.html
 *.xml
 results/

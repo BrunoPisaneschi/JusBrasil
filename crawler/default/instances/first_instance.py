@@ -69,8 +69,14 @@ class FirstInstance:
                     f"dadosConsulta.tipoNuProcesso=UNIFICADO",
                 follow_redirects=False,
             )
+            try:
+                processo_codigo = search(r'(?<=processo.codigo=)(.*?)(?=&)', response.headers.get('location', "")).group()
+            except AttributeError:
+                if 'Não existem informações disponíveis' in response.text:
+                    return None
+                else:
+                    logger.error("Situação inesperada na execução")
 
-            processo_codigo = search(r'(?<=processo.codigo=)(.*?)(?=&)', response.headers.get('location', "")).group()
         return processo_codigo
 
     async def _consultar_processo(self, processo_codigo, numero_processo):
