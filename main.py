@@ -13,12 +13,13 @@ from api.schemas.output import StatusSolicitacaoOutput, ConsultaProcessoOutput, 
 from api.services.process_handler import process_request
 from database.service import startup, shutdown, set_data, get_data
 
-# Configurando o log
+# Configuração de log
 basicConfig(filename='app.txt',
             level=DEBUG,
             format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = getLogger(__name__)
 
+# Inicialização do FastAPI
 app = FastAPI(
     title="JusBrasil",
     description="API desenvolvida como desafio técnico para o JusBrasil.",
@@ -26,19 +27,25 @@ app = FastAPI(
     redoc_url=None
 )
 
+# Registrando funções de inicialização e desligamento
 app.add_event_handler("startup", startup)
 app.add_event_handler("shutdown", shutdown)
 
 
-# Redirecionar a página inicial para /docs
 @app.get("/", include_in_schema=False)
 def read_root():
+    """
+    Redireciona a raiz para a página de documentação.
+    """
     logger.info("Raiz acessada")
     return RedirectResponse(url="/docs")
 
 
 @app.exception_handler(InvalidParameterError)
 def handle_invalid_parameter_error(request, exc):
+    """
+    Manipula erros de parâmetros inválidos.
+    """
     return JSONResponse(
         status_code=422,
         content={"message": str(exc)},
@@ -47,10 +54,13 @@ def handle_invalid_parameter_error(request, exc):
 
 @app.post("/consulta-processo", response_model=ConsultaProcessoOutput, responses=ConsultaProcessoResponses.responses())
 async def consulta_processo(payload: ConsultaProcessoInput = Depends()):
-    # Criar um número de solicitação
+    """
+    Recebe uma solicitação de consulta de processo e a coloca na fila para processamento.
+    """
+    # Cria um número de solicitação
     solicitacao_id = str(uuid4())
 
-    # Armazene os detalhes da consulta no Redis
+    # Armazena os detalhes da consulta no banco de dados (ex. Redis)
     logger.info("Solicitação recebida, dados salvos no banco")
     await set_data(key=solicitacao_id, value=dumps({
         "numero_processo": payload.numero_processo,
@@ -60,6 +70,7 @@ async def consulta_processo(payload: ConsultaProcessoInput = Depends()):
 
     response = {"numero_solicitacao": solicitacao_id}
 
+    # Inicia tarefa assíncrona para processar a solicitação
     asyncio.create_task(process_request(solicitacao_id))
 
     return JSONResponse(
@@ -72,9 +83,12 @@ async def consulta_processo(payload: ConsultaProcessoInput = Depends()):
          response_model=StatusSolicitacaoOutput,
          responses=StatusSolicitacaoResponses.responses())
 async def status_solicitacao(payload: StatusSolicitacaoInput = Depends()):
+    """
+    Recupera o status de uma solicitação de consulta de processo.
+    """
     dados_solicitacao = await get_data(payload.numero_solicitacao)
 
-    # Verificar se o número da solicitação existe
+    # Verifica se o número da solicitação existe
     if dados_solicitacao is None:
         logger.info(f"Solicitação {payload.numero_solicitacao} não encontrada")
         return JSONResponse({"error": "Solicitação não encontrada"}, status_code=404)

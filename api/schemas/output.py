@@ -1,9 +1,6 @@
 from typing import Optional
 from uuid import UUID
-
 from pydantic import BaseModel, model_validator, ValidationError
-
-from api.exceptions import InvalidParameterError
 
 
 class ConsultaProcessoOutput(BaseModel):
@@ -11,6 +8,11 @@ class ConsultaProcessoOutput(BaseModel):
 
     @model_validator(mode="before")
     def valida_numero_solicitacao(self):
+        """
+        Valida o campo numero_solicitacao, verificando se ele está no formato UUID.
+
+        :raises ValidationError: se numero_solicitacao não for compatível com o formato UUID
+        """
         try:
             UUID(self.get("numero_solicitacao"))
             return self
@@ -21,6 +23,7 @@ class ConsultaProcessoOutput(BaseModel):
 
 
 class ExtractDataOutput(BaseModel):
+    """Modelo de saída para detalhes de um processo."""
     classe: str
     area: str
     assunto: str
@@ -32,11 +35,14 @@ class ExtractDataOutput(BaseModel):
 
 
 class ExtractDataSecondInstanceOutput(ExtractDataOutput):
+    """Modelo de saída para detalhes de um processo em segunda instância. Deriva de ExtractDataOutput."""
     data_distribuicao: Optional[str] = None
     juiz: Optional[str] = None
 
 
 class StatusSolicitacaoOutput(BaseModel):
+    """Modelo de saída para status da solicitação de um processo."""
+
     # cenário enquanto ainda está sendo processado
     numero_processo: Optional[str] = None
     sigla_tribunal: Optional[str] = None
@@ -48,13 +54,16 @@ class StatusSolicitacaoOutput(BaseModel):
 
 
 class BaseError(BaseModel):
+    """Modelo base para representar erros."""
     error: str
 
 
 class DefaultResponses:
+    """Classe base para respostas HTTP padrão."""
 
     @classmethod
     def _status_422(cls):
+        """Resposta para o código de status 422 (Unprocessable Entity)."""
         return {
             422: {
                 "model": BaseError,
@@ -71,6 +80,7 @@ class DefaultResponses:
 
     @classmethod
     def _status_500(cls):
+        """Resposta para o código de status 500 (Internal Server Error)."""
         return {
             500: {
                 "model": BaseError,
@@ -87,12 +97,16 @@ class DefaultResponses:
 
     @classmethod
     def responses(cls):
+        """Método que agrega todas as respostas padrão."""
         return {k: v for method in dir(cls) if method.startswith("_status") for k, v in getattr(cls, method)().items()}
 
 
 class ConsultaProcessoResponses(DefaultResponses):
+    """Respostas para a consulta de processo."""
+
     @classmethod
     def _status_200(cls):
+        """Resposta para o código de status 200 (OK) para a consulta de processo."""
         return {
             200: {
                 "model": ConsultaProcessoOutput,
@@ -109,6 +123,7 @@ class ConsultaProcessoResponses(DefaultResponses):
 
     @classmethod
     def _status_404(cls):
+        """Resposta para o código de status 404 (Not Found) para a consulta de processo."""
         return {
             404: {
                 "model": BaseError,
@@ -125,6 +140,9 @@ class ConsultaProcessoResponses(DefaultResponses):
 
 
 class StatusSolicitacaoResponses(DefaultResponses):
+    """Respostas para a consulta de status de solicitação."""
+
+    # Exemplo de processo para resposta
     processo_exemplo = {
         "first_instance": {
             "classe": "Penal",
@@ -230,6 +248,7 @@ class StatusSolicitacaoResponses(DefaultResponses):
 
     @classmethod
     def _status_200(cls):
+        """Resposta para o código de status 200 (OK) para a consulta de status de solicitação."""
         return {
             200: {
                 "model": StatusSolicitacaoOutput,
@@ -257,6 +276,7 @@ class StatusSolicitacaoResponses(DefaultResponses):
 
     @classmethod
     def _status_404(cls):
+        """Resposta para o código de status 404 (Not Found) para a consulta de status de solicitação."""
         return {
             404: {
                 "model": BaseError,
