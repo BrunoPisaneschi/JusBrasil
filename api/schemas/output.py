@@ -1,3 +1,4 @@
+from typing import Optional
 from uuid import UUID
 
 from pydantic import BaseModel, model_validator, ValidationError
@@ -17,7 +18,7 @@ class ConsultaProcessoOutput(BaseModel):
             )
 
 
-class StatusSolicitacaoOutput(BaseModel):
+class ExtractDataOutput(BaseModel):
     classe: str
     area: str
     assunto: str
@@ -26,3 +27,19 @@ class StatusSolicitacaoOutput(BaseModel):
     valor_acao: str
     partes_processo: list[dict]
     lista_movimentacoes: list[dict]
+
+
+class ExtractDataSecondInstanceOutput(ExtractDataOutput):
+    data_distribuicao: Optional[str] = None
+    juiz: Optional[str] = None
+
+
+class StatusSolicitacaoOutput(BaseModel):
+    # cenário enquanto ainda está sendo processado
+    numero_processo: Optional[str] = None
+    sigla_tribunal: Optional[str] = None
+    status: Optional[str] = None
+
+    # cenário após processar os dados
+    first_instance: Optional[ExtractDataOutput] = None
+    second_instance: Optional[ExtractDataSecondInstanceOutput] = None

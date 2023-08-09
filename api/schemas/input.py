@@ -7,7 +7,7 @@ SIGLAS_TRIBUNAIS_DISPONIVEIS = Literal['TJAL', 'TJCE']
 
 
 class ConsultaProcessoInput(BaseModel):
-    numero_processo: str
+    numero_processo: str  # TODO: validar formatação do numero do processo
     sigla_tribunal: SIGLAS_TRIBUNAIS_DISPONIVEIS
 
 

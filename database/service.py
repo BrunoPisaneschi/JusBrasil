@@ -27,3 +27,13 @@ async def startup():
 async def shutdown():
     redis_pool.close()
     await redis_pool.wait_closed()
+
+
+async def get_data(key):
+    _redis_pool = await get_redis_pool()
+    return await _redis_pool.get(key)
+
+
+async def set_data(key, value):
+    _redis_pool = await get_redis_pool()
+    await _redis_pool.set(key, value)

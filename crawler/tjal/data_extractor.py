@@ -8,8 +8,7 @@ class DataExtractor:
     def find_text(self, tag_id):
         try:
             return self.soup.find(id=tag_id).get_text(strip=True)
-        except Exception as error:
-            print(error)
+        except AttributeError:
             return None
 
     def find_table_data(self, table_id):
@@ -46,18 +45,40 @@ class DataExtractor:
             "Defesa": advogados
         }
 
-    @staticmethod
-    def _capturar_movimentacoes(row):
-        data_movimentacao = row.find('td', class_='dataMovimentacao').get_text(strip=True)
+    def _capturar_movimentacoes(self, row):
+        try:
+            data_movimentacao = row.find('td', class_='dataMovimentacao').get_text(strip=True)
+        except AttributeError:
+            data_movimentacao = row.find('td', class_='dataMovimentacaoProcesso').get_text(strip=True)
+
         movimentacao = row.find('td', class_='descricaoMovimentacao')
+
+        if movimentacao:
+            titulo_movimentacao = movimentacao.next.get_text(strip=True)
+            descricao_movimentacao = movimentacao.find('span').get_text(strip=True)
+        else:
+            titulo_movimentacao, descricao_movimentacao = self._capturar_dados_movimentacoes_segunda_instancia(
+                row.find('td', class_='descricaoMovimentacaoProcesso')
+            )
 
         return {
             "Data": data_movimentacao,
             "Movimento": {
-                "titulo_movimentacao": movimentacao.next.get_text(strip=True),
-                "descricao_movimentacao": movimentacao.find('span').get_text(strip=True)
+                "titulo_movimentacao": titulo_movimentacao,
+                "descricao_movimentacao": descricao_movimentacao
             }
         }
+
+    @staticmethod
+    def _capturar_dados_movimentacoes_segunda_instancia(movimentacao):
+        texto_movimentacao = movimentacao.get_text(strip=True, separator="|||")
+        titulo_movimentacao, separador, descricao_movimentacao = texto_movimentacao.partition("|||")
+
+        if separador:  # Se o separador estiver presente, o título e a descrição serão retornados.
+            return titulo_movimentacao, descricao_movimentacao
+
+        # Se o separador não estiver presente, o título completo será retornado, e a descrição será None.
+        return titulo_movimentacao, None
 
     def extract(self, fields):
         return {

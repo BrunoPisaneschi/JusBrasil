@@ -2,19 +2,17 @@ from importlib import import_module
 from json import dumps, loads
 
 from api.schemas.output import StatusSolicitacaoOutput
-from database.service import get_redis_pool
+from database.service import get_data, set_data
 
 
 async def process_request(solicitacao_id: str):
-    redis_pool = await get_redis_pool()
-
-    dados_solicitacao = await redis_pool.get(solicitacao_id)
+    dados_solicitacao = await get_data(solicitacao_id)
     dict_dados_solicitacao = loads(dados_solicitacao)
 
     numero_processo = dict_dados_solicitacao.get("numero_processo")
     sigla_tribunal = dict_dados_solicitacao.get("sigla_tribunal")
 
-    await redis_pool.set(solicitacao_id, dumps({
+    await set_data(key=solicitacao_id, value=dumps({
         "numero_processo": numero_processo,
         "sigla_tribunal": sigla_tribunal,
         "status": "Em processamento"
@@ -26,7 +24,7 @@ async def process_request(solicitacao_id: str):
 
     dados_capturados = await tj().capturar_dados(numero_processo=dict_dados_solicitacao.get("numero_processo"))
 
-    await redis_pool.set(
-        solicitacao_id,
-        dumps(StatusSolicitacaoOutput.model_validate(dados_capturados).model_dump())
+    await set_data(
+        key=solicitacao_id,
+        value=dumps(StatusSolicitacaoOutput.model_validate(dados_capturados).model_dump(exclude_none=True))
     )
