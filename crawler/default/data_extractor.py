@@ -53,13 +53,10 @@ class DataExtractor:
 
         movimentacao = row.find('td', class_='descricaoMovimentacao')
 
-        if movimentacao:
-            titulo_movimentacao = movimentacao.next.get_text(strip=True)
-            descricao_movimentacao = movimentacao.find('span').get_text(strip=True)
-        else:
-            titulo_movimentacao, descricao_movimentacao = self._capturar_dados_movimentacoes_segunda_instancia(
-                row.find('td', class_='descricaoMovimentacaoProcesso')
-            )
+        if not movimentacao:
+            movimentacao = row.find('td', class_='descricaoMovimentacaoProcesso')
+
+        titulo_movimentacao, descricao_movimentacao = self._capturar_dados_movimentacoes(movimentacao)
 
         return {
             "Data": data_movimentacao,
@@ -70,7 +67,7 @@ class DataExtractor:
         }
 
     @staticmethod
-    def _capturar_dados_movimentacoes_segunda_instancia(movimentacao):
+    def _capturar_dados_movimentacoes(movimentacao):
         texto_movimentacao = movimentacao.get_text(strip=True, separator="|||")
         titulo_movimentacao, separador, descricao_movimentacao = texto_movimentacao.partition("|||")
 

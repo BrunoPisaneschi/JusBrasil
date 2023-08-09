@@ -23,8 +23,8 @@ class ExtractDataOutput(BaseModel):
     area: str
     assunto: str
     data_distribuicao: str
-    juiz: str
-    valor_acao: str
+    juiz: Optional[str] = None
+    valor_acao: Optional[str] = None
     partes_processo: list[dict]
     lista_movimentacoes: list[dict]
 
