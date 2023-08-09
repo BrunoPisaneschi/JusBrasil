@@ -12,23 +12,32 @@ Desafio técnico proposto pela equipe do JusBrasil, que consiste em uma API capa
 ## Execução
 O projeto está configurado para ser executado no docker, então basta rodar o seguinte comando
 ```shell
-docker-compose up
+inv start-docker
 ```
 Assim que o projeto estiver rodando, acesse o [localhost](http://127.0.0.1:8000).
+
+Para parar, execute:
+```shell
+inv stop-docker
+```
 
 ## .ENV
 Devido este ser um projeto de desafio técnico, foi incluído no repositório o arquivo `.env`.
 
 ## Testes
 Foi implementado os testes unitários e testes de integração.
-Abaixo, segue uma breve descrição da implementação e como executá-los.
+Abaixo, segue uma breve descrição da implementação e como executá-los, ao final da execução completa, irá desativar o docker.
 
+Caso queira executar ambos de uma vez, execute este comando:
+- ```shell
+  inv all-tests
+    ```
 ### Testes unitários
 Para realizar esses testes, foi utilizado a biblioteca `unit-tests`.
 
 Com o comando abaixo, é possível executar todos os testes unitários, que estão salvos no diretório `tests\unit`
 - ```shell
-  aaaaaa
+  inv unit-tests
     ```
   
 ### Testes de integração
@@ -38,7 +47,7 @@ Este framework irá realizar requisições a API e validar os resultados, para i
 
 Mas fique tranquilo, pois com o comando abaixo, já está tudo feito para garantir que a API seja executada antes dos testes.
 - ```shell
-  aaaaaa
+  inv integration-tests
     ```
   
 Para conferir o conteúdo dos testes de integração, eles estão salvos no caminho `tests\integration`.

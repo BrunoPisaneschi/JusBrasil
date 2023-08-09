@@ -29,6 +29,7 @@ def start_docker(c):
     """
     print("Iniciando Docker...")
     c.run("docker-compose up -d")
+    wait_for_docker(c)
     print("Docker iniciado.")
 
 
