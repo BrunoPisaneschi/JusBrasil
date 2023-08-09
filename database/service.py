@@ -15,7 +15,7 @@ async def get_redis_pool():
     if redis_pool is None:
         try:
             redis_pool = await create_redis_pool(REDIS_URL)
-        except gaierror:
+        except (OSError, gaierror):
             raise ConnectionClosedError("Redis offline")
     return redis_pool
 

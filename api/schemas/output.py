@@ -24,5 +24,5 @@ class StatusSolicitacaoOutput(BaseModel):
     data_distribuicao: str
     juiz: str
     valor_acao: str
-    partes_processo: list[str]
+    partes_processo: list[dict]
     lista_movimentacoes: list[dict]

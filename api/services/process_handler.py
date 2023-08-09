@@ -1,5 +1,5 @@
-from asyncio import sleep
-from json import dumps
+from importlib import import_module
+from json import dumps, loads
 
 from api.schemas.output import StatusSolicitacaoOutput
 from database.service import get_redis_pool
@@ -9,30 +9,23 @@ async def process_request(solicitacao_id: str):
     redis_pool = await get_redis_pool()
 
     dados_solicitacao = await redis_pool.get(solicitacao_id)
+    dict_dados_solicitacao = loads(dados_solicitacao)
 
-    # Simulando o processamento da solicitação (por exemplo, buscar dados de um banco de dados externo)
-    await sleep(5)
+    numero_processo = dict_dados_solicitacao.get("numero_processo")
+    sigla_tribunal = dict_dados_solicitacao.get("sigla_tribunal")
 
-    dados_capturados = {
-        "classe": "Civil",
-        "area": "Cível",
-        "assunto": "Contratos",
-        "data_distribuicao": "2022-01-01",
-        "juiz": "Dr. João Silva",
-        "valor_acao": "R$ 10.000,00",
-        "partes_processo": [
-            "Parte A",
-            "Parte B"
-        ],
-        "lista_movimentacoes": [
-            {
-                "data": "2022-01-02",
-                "movimento": "Em análise"
-            }
-        ]
-    }
+    await redis_pool.set(solicitacao_id, dumps({
+        "numero_processo": numero_processo,
+        "sigla_tribunal": sigla_tribunal,
+        "status": "Em processamento"
+    }))
 
-    # Simular a resposta
+    module = import_module(f"crawler.{sigla_tribunal.lower()}.main")
+
+    tj = getattr(module, sigla_tribunal.upper())
+
+    dados_capturados = await tj().capturar_dados(numero_processo=dict_dados_solicitacao.get("numero_processo"))
+
     await redis_pool.set(
         solicitacao_id,
         dumps(StatusSolicitacaoOutput.model_validate(dados_capturados).model_dump())

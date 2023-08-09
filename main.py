@@ -33,7 +33,7 @@ async def consulta_processo(payload: ConsultaProcessoInput = Depends()):
     await redis_pool.set(solicitacao_id, dumps({
         "numero_processo": payload.numero_processo,
         "sigla_tribunal": payload.sigla_tribunal,
-        "status": "Em processamento"
+        "status": "Na Fila"
     }))
 
     response = {"numero_solicitacao": solicitacao_id}
