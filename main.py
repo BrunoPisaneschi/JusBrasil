@@ -72,14 +72,14 @@ async def consulta_processo(payload: ConsultaProcessoInput = Depends()):
          response_model=StatusSolicitacaoOutput,
          responses=StatusSolicitacaoResponses.responses())
 async def status_solicitacao(payload: StatusSolicitacaoInput = Depends()):
-    dados_solicitacao = await get_data(payload.numero_solicitacao.__str__())
+    dados_solicitacao = await get_data(payload.numero_solicitacao)
 
     # Verificar se o número da solicitação existe
     if dados_solicitacao is None:
         logger.info(f"Solicitação {payload.numero_solicitacao} não encontrada")
         return JSONResponse({"error": "Solicitação não encontrada"}, status_code=404)
 
-    response = loads(dados_solicitacao.decode("utf-8"))
+    response = loads(dados_solicitacao)
 
     return JSONResponse(
         content=StatusSolicitacaoOutput.model_validate(response).model_dump(exclude_none=True),
