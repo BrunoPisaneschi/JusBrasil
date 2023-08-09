@@ -7,11 +7,17 @@ from fastapi.responses import RedirectResponse, JSONResponse
 
 from api.exceptions import InvalidParameterError
 from api.schemas.input import ConsultaProcessoInput, StatusSolicitacaoInput
-from api.schemas.output import StatusSolicitacaoOutput, ConsultaProcessoOutput
+from api.schemas.output import StatusSolicitacaoOutput, ConsultaProcessoOutput, ConsultaProcessoResponses, \
+    StatusSolicitacaoResponses
 from api.services.process_handler import process_request
 from database.service import startup, shutdown, set_data, get_data
 
-app = FastAPI()
+app = FastAPI(
+    title="JusBrasil",
+    description="API desenvolvida como desafio técnico para o JusBrasil.",
+    version="1.0.0",
+    redoc_url=None
+)
 
 app.add_event_handler("startup", startup)
 app.add_event_handler("shutdown", shutdown)
@@ -31,7 +37,7 @@ def handle_invalid_parameter_error(request, exc):
     )
 
 
-@app.post("/consulta-processo", response_model=ConsultaProcessoOutput)
+@app.post("/consulta-processo", response_model=ConsultaProcessoOutput, responses=ConsultaProcessoResponses.responses())
 async def consulta_processo(payload: ConsultaProcessoInput = Depends()):
     # Criar um número de solicitação
     solicitacao_id = str(uuid4())
@@ -53,13 +59,15 @@ async def consulta_processo(payload: ConsultaProcessoInput = Depends()):
     )
 
 
-@app.get("/status-solicitacao/{numero_solicitacao}", response_model=StatusSolicitacaoOutput)
+@app.get("/status-solicitacao/{numero_solicitacao}",
+         response_model=StatusSolicitacaoOutput,
+         responses=StatusSolicitacaoResponses.responses())
 async def status_solicitacao(payload: StatusSolicitacaoInput = Depends()):
     dados_solicitacao = await get_data(payload.numero_solicitacao.__str__())
 
     # Verificar se o número da solicitação existe
     if dados_solicitacao is None:
-        return JSONResponse({"error": "Solicitação não encontrada."}, status_code=404)
+        return JSONResponse({"error": "Solicitação não encontrada"}, status_code=404)
 
     response = loads(dados_solicitacao.decode("utf-8"))
 

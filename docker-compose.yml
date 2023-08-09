@@ -1,7 +1,8 @@
 version: '3.8'
 
 services:
-  minha-api:
+  api:
+    container_name: api_jusbrasil
     build:
       context: .
       dockerfile: Dockerfile
@@ -11,11 +12,12 @@ services:
       - .:/app
     environment:
       - PYTHONUNBUFFERED=1
-      - REDIS_URL=redis://redis:6379
+      - REDIS_URL=${REDIS_URL}
     depends_on:
       - redis
 
   redis:
+    container_name: redis
     image: "redis:latest"
     ports:
       - "6379:6379"

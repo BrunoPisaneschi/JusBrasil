@@ -5,7 +5,7 @@ from decouple import config
 from aioredis import create_redis_pool
 from aioredis.errors import ConnectionClosedError
 
-REDIS_URL = config("REDIS_URL", "redis://redis:6379")
+REDIS_URL = config("REDIS_URL", "redis://localhost:6379")
 
 redis_pool = None
 
