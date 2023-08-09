@@ -1,3 +1,7 @@
+*/.pytest_cache/*
 tests/
 .idea
 README.md
+*.txt
+*.html
+*.xml
