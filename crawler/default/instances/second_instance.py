@@ -2,7 +2,7 @@ from logging import basicConfig, getLogger, INFO
 
 from re import search
 
-from httpx import AsyncClient
+from aiohttp import ClientSession
 
 from api.exceptions import InvalidParameterError
 from crawler.default.data_extractor import DataExtractor
@@ -71,7 +71,7 @@ class SecondInstance:
             )
 
         # Criando um cliente assíncrono para fazer a requisição HTTP.
-        async with AsyncClient() as client:
+        async with ClientSession() as client:
             response = await client.get(
                 url=f"{self.url_base}/cposg5/search.do?"
                     f"conversationId=&"
@@ -84,10 +84,10 @@ class SecondInstance:
                     f"dePesquisa=&"
                     f"tipoNuProcesso=UNIFICADO"
             )
-
+            html = await response.text()
             # Usando expressão regular para extrair o código do processo.
             try:
-                processo_codigo = search(r'(?<=id=\"processoSelecionado\"\svalue=\")(.*?)(?=")', response.text).group()
+                processo_codigo = search(r'(?<=id=\"processoSelecionado\"\svalue=\")(.*?)(?=")', html).group()
             except AttributeError:
                 if 'Não existem informações disponíveis' in response.text:
                     return None
@@ -104,14 +104,14 @@ class SecondInstance:
         :return: Conteúdo HTML do processo.
         """
         # Realiza uma solicitação HTTP para obter os detalhes do processo.
-        async with AsyncClient() as client:
+        async with ClientSession() as client:
             response = await client.get(
                 url=f"{self.url_base}/cposg5/show.do",
                 params={
                     "processo.codigo": processo_codigo,
                 }
             )
-            return response.content
+            return await response.text()
 
     @staticmethod
     def _extrair_dados(html):
