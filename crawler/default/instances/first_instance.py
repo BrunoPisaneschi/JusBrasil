@@ -1,6 +1,6 @@
 from logging import basicConfig, getLogger, INFO
 from re import search
-from httpx import AsyncClient
+from aiohttp import ClientSession
 from api.exceptions import InvalidParameterError
 from crawler.default.data_extractor import DataExtractor
 
@@ -51,12 +51,13 @@ class FirstInstance:
         try:
             numero_digito_ano_unificado, foro_numero_unificado = numero_processo.split(self.codigo_tj)
         except ValueError:
+            logger.info("Erro na quebra do numero do processo")
             raise InvalidParameterError(
                 message=f"Certifique-se de que o número do processo '{numero_processo}' e "
                         f"o código da sigla do TJ '{self.codigo_tj}' sejam compatíveis."
             )
 
-        async with AsyncClient() as client:
+        async with ClientSession() as client:
             response = await client.get(
                 url=f"{self.url_base}/cpopg/search.do?"
                     f"conversationId=&"
@@ -67,8 +68,9 @@ class FirstInstance:
                     f"dadosConsulta.valorConsultaNuUnificado=UNIFICADO&"
                     f"dadosConsulta.valorConsulta=&"
                     f"dadosConsulta.tipoNuProcesso=UNIFICADO",
-                follow_redirects=False,
+                allow_redirects=False,
             )
+
             try:
                 processo_codigo = search(r'(?<=processo.codigo=)(.*?)(?=&)', response.headers.get('location', "")).group()
             except AttributeError:
@@ -88,7 +90,7 @@ class FirstInstance:
         :param numero_processo: Número do processo.
         :return: Conteúdo HTML da página do processo.
         """
-        async with AsyncClient() as client:
+        async with ClientSession() as client:
             response = await client.get(
                 url=f"{self.url_base}/cpopg/show.do",
                 params={
@@ -97,7 +99,7 @@ class FirstInstance:
                     "processo.numero": numero_processo
                 }
             )
-            return response.content
+            return await response.text()
 
     @staticmethod
     def _extrair_dados(html):
