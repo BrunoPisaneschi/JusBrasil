@@ -47,13 +47,10 @@ async def test_process_request_import_failure():
     mock_redis = MagicMock()
     mock_redis.get_data.return_value = '{"numero_processo": "1234", "sigla_tribunal": "UNKNOWN"}'
 
-    # Retornar None para simular falha na importação do módulo
     with patch('api.services.process_handler.RedisConnection', return_value=mock_redis), \
             patch('api.services.process_handler.import_module', return_value=None):
-        # Não esperamos mais uma exceção aqui porque a função foi modificada para lidar com ela
         await process_request("test_solicitacao_id")
 
-        # Verificar as chamadas ao método set_data do mock_redis
         calls = [call(key="test_solicitacao_id",
                       value=dumps({
                           "numero_processo": "1234",
