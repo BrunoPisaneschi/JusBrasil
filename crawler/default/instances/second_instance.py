@@ -93,6 +93,7 @@ class SecondInstance:
                     return None
                 else:
                     logger.error("Situação inesperada na execução")
+                    return None
 
         return processo_codigo
 
