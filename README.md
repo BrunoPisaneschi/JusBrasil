@@ -29,16 +29,16 @@ Foi implementado os testes unitários e testes de integração.
 Abaixo, segue uma breve descrição da implementação e como executá-los, ao final da execução completa, irá desativar o docker.
 
 Caso queira executar ambos de uma vez, execute este comando:
-- ```shell
-  inv all-tests
-    ```
+```shell
+inv all-tests
+```
 ### Testes unitários
 Para realizar esses testes, foi utilizado a biblioteca `unit-tests`.
 
 Com o comando abaixo, é possível executar todos os testes unitários, que estão salvos no diretório `tests\unit`
-- ```shell
-  inv unit-tests
-    ```
+```shell
+inv unit-tests
+```
   
 ### Testes de integração
 Para estes testes foi utilizado o framework chamado `robot-framework`.
@@ -46,9 +46,9 @@ Para estes testes foi utilizado o framework chamado `robot-framework`.
 Este framework irá realizar requisições a API e validar os resultados, para isso, **é necessário que a API esteja em execução**, caso contrário, será lançado um erro.
 
 Mas fique tranquilo, pois com o comando abaixo, já está tudo feito para garantir que a API seja executada antes dos testes.
-- ```shell
-  inv integration-tests
-    ```
+```shell
+inv integration-tests
+```
   
 Para conferir o conteúdo dos testes de integração, eles estão salvos no caminho `tests\integration`.
 O arquivo `.robot` é o arquivo principal e os demais são encapsulamentos.
