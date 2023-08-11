@@ -8,6 +8,8 @@ def wait_for_docker(c):
     Aguarda até que os containers Docker estejam prontos.
     Tenta verificar o status dos containers até 10 vezes, esperando 5 segundos entre cada tentativa.
     Se o status "Up" não for encontrado, o programa terminará com um erro.
+
+    :param c: Uma instância de contexto fornecida pela biblioteca invoke.
     """
     print("Aguardando o Docker ficar pronto...")
     # Aguardar um tempo suficiente para os serviços estarem prontos
@@ -26,6 +28,8 @@ def wait_for_docker(c):
 def start_docker(c):
     """
     Inicia os containers Docker usando o comando 'docker-compose up'.
+
+    :param c: Uma instância de contexto fornecida pela biblioteca invoke.
     """
     print("Iniciando Docker...")
     c.run("docker-compose up -d")
@@ -37,6 +41,8 @@ def start_docker(c):
 def stop_docker(c):
     """
     Para os containers Docker usando o comando 'docker-compose down'.
+
+    :param c: Uma instância de contexto fornecida pela biblioteca invoke.
     """
     print("Parando Docker...")
     c.run("docker-compose down")
@@ -47,9 +53,11 @@ def stop_docker(c):
 def unit_tests(c):
     """
     Executa testes unitários usando pytest para testes assíncronos.
+
+    :param c: Uma instância de contexto fornecida pela biblioteca invoke.
     """
     print("Rodando testes unitários com pytest-asyncio...")
-    c.run("pytest --verbose -m asyncio")
+    c.run("pytest --verbose")
     print("Testes unitários completados.")
 
 
@@ -57,6 +65,8 @@ def unit_tests(c):
 def integration_tests(c):
     """
     Inicia o Docker, aguarda até que esteja pronto e executa testes de integração com o Robot Framework.
+
+    :param c: Uma instância de contexto fornecida pela biblioteca invoke.
     """
     start_docker(c)
     wait_for_docker(c)
@@ -66,9 +76,26 @@ def integration_tests(c):
 
 
 @task
+def coverage(c):
+    """
+    Executa testes usando coverage e exibe um relatório de cobertura.
+
+    Esta função executa o conjunto de testes com pytest sob a supervisão do coverage
+    e, em seguida, produz um relatório de cobertura no terminal. Foi projetada
+    para fornecer uma rápida visão geral de quais partes do código foram
+    testadas e quais não foram.
+
+    :param c: Uma instância de contexto fornecida pela biblioteca invoke.
+    """
+    c.run("coverage run --omit=./tests/* -m pytest && coverage report")
+
+
+@task
 def all_tests(c):
     """
     Executa todos os testes, incluindo testes unitários e de integração, garantindo que os containers Docker estejam ativos.
+
+    :param c: Uma instância de contexto fornecida pela biblioteca invoke.
     """
     unit_tests(c)
     integration_tests(c)
