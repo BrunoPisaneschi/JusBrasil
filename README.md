@@ -50,5 +50,5 @@ Mas fique tranquilo, pois com o comando abaixo, já está tudo feito para garant
 inv integration-tests
 ```
   
-Para conferir o conteúdo dos testes de integração, eles estão salvos no caminho `tests\integration`.
-O arquivo `.robot` é o arquivo principal e os demais são encapsulamentos.
+Para conferir o conteúdo dos testes de integração, ele está salvo no caminho `tests\integration`.
+O arquivo `.robot` é o arquivo principal.
