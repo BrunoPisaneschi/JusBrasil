@@ -24,14 +24,7 @@ Consultar Processo
 
 Verificar Status Da Solicitacao
     [Arguments]    ${numero_solicitacao}
-    Log    ${numero_solicitacao}
-    FOR    ${i}    IN RANGE    1    3
-        Log    ${i}
-        ${response}=    GET On Session    Session    /status-solicitacao/${numero_solicitacao}
-        Should Be Equal As Strings    ${response.status_code}    200
-        ${json_response}=    Set Variable    ${response.json()}
-        Log    ${json_response}
-        ${first_instance_exists}=    Run Keyword And Return Status    Dictionary Should Contain Key    ${json_response}    first_instance
-        Exit For Loop If    ${first_instance_exists}
-        Sleep    1s    # Aguarde 5 segundos antes de verificar novamente
-    END
+    ${response}=    GET On Session    Session    /status-solicitacao/${numero_solicitacao}
+    Should Be Equal As Strings    ${response.status_code}    200
+    ${json_response}=    Set Variable    ${response.json()}
+    Dictionary Should Contain Key    ${json_response}    first_instance

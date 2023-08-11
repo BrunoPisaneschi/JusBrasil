@@ -1,6 +1,8 @@
 from typing import Optional
 from uuid import UUID
-from pydantic import BaseModel, model_validator, ValidationError
+from pydantic import BaseModel, model_validator
+
+from api.exceptions import InvalidParameterError
 
 
 class ConsultaProcessoOutput(BaseModel):
@@ -17,7 +19,7 @@ class ConsultaProcessoOutput(BaseModel):
             UUID(self.get("numero_solicitacao"))
             return self
         except ValueError:
-            raise ValidationError(
+            raise InvalidParameterError(
                 f"numero_solicitacao {self.get('numero_solicitacao')} não é compatível com o formato UUID"
             )
 
