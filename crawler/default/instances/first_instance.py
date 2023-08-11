@@ -34,6 +34,7 @@ class FirstInstance:
         processo_codigo = await self._capturar_numero_processo_codigo(numero_processo=numero_processo)
         if not processo_codigo:
             logger.info("Número de processo não encontrado")
+            return None
         html = await self._consultar_processo(processo_codigo=processo_codigo, numero_processo=numero_processo)
         logger.info("Extraindo dados primeira instancia")
         return self._extrair_dados(html=html)
@@ -74,10 +75,12 @@ class FirstInstance:
             try:
                 processo_codigo = search(r'(?<=processo.codigo=)(.*?)(?=&)', response.headers.get('location', "")).group()
             except AttributeError:
-                if 'Não existem informações disponíveis' in response.text:
+                text = await response.text()
+                if 'Não existem informações disponíveis' in text:
                     return None
                 else:
                     logger.error("Situação inesperada na execução")
+                    return None
 
         return processo_codigo
 

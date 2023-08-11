@@ -13,7 +13,7 @@ def test_read_root():
 
 
 def test_handle_invalid_parameter_error():
-    response = client.post("/consulta-processo", params={"numero_processo": "123", "sigla_tribunal": "TJAL"})
+    response = client.post("/consulta-processo", json={"numero_processo": "123", "sigla_tribunal": "TJAL"})
     assert response.status_code == 422  # Expected status code for InvalidParameterError
     assert {
                'message': "numero_processo '123' não é compatível com o padrão NNNNNNN-DD.AAAA.J.TR.OOOO"} == response.json()
