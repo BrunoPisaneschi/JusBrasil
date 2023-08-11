@@ -69,7 +69,6 @@ def integration_tests(c):
     :param c: Uma instância de contexto fornecida pela biblioteca invoke.
     """
     start_docker(c)
-    wait_for_docker(c)
     print("Rodando testes de integração com Robot Framework...")
     c.run("robot -d results tests/integration")
     print("Testes de integração completados.")
