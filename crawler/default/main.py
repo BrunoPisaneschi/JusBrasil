@@ -30,6 +30,9 @@ class DefaultTJ:
         # Captura os dados da segunda instância usando o número do processo
         second_instance_data = await self.second_instance.capturar_dados(numero_processo=numero_processo)
 
+        if not first_instance_data and not second_instance_data:
+            return None
+
         # Compila os dados capturados em um dicionário e retorna
         return {
             "first_instance": first_instance_data if first_instance_data else None,

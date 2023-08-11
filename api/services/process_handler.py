@@ -61,6 +61,17 @@ async def process_request(solicitacao_id: str):
     # Capturando os dados do processo
     dados_capturados = await tj().capturar_dados(numero_processo=dict_dados_solicitacao.get("numero_processo"))
 
+    if not dados_capturados:
+        logger.info("Encerrado - Nenhum dado capturado")
+
+        redis.set_data(key=solicitacao_id, value=dumps({
+            "numero_processo": numero_processo,
+            "sigla_tribunal": sigla_tribunal,
+            "status": f"Encerrado - Nenhum dado capturado"
+        }))
+
+        return
+
     logger.info("Dados capturados, encerrando solicitação.")
 
     # Atualizando o banco de dados com os dados capturados

@@ -89,7 +89,8 @@ class SecondInstance:
             try:
                 processo_codigo = search(r'(?<=id=\"processoSelecionado\"\svalue=\")(.*?)(?=")', html).group()
             except AttributeError:
-                if 'Não existem informações disponíveis' in response.text:
+                text = await response.text()
+                if 'Não existem informações disponíveis' in text:
                     return None
                 else:
                     logger.error("Situação inesperada na execução")
