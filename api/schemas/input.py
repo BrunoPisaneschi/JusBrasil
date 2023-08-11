@@ -13,9 +13,15 @@ SIGLAS_TRIBUNAIS_DISPONIVEIS = Literal['TJAL', 'TJCE']
 class ConsultaProcessoInput(BaseModel):
     """Modelo de entrada para consulta de um processo."""
 
-    numero_processo: str = Field(max_length=25,
-                                 min_length=25)  # Número do processo, com comprimento fixo de 25 caracteres.
-    sigla_tribunal: SIGLAS_TRIBUNAIS_DISPONIVEIS  # Sigla do tribunal que pertence ao processo, deve estar na lista de siglas disponíveis.
+    numero_processo: str = Field(
+        default="NNNNNNN-DD.AAAA.J.TR.OOOO",
+        max_length=25,
+        min_length=25
+    )  # Número do processo, com comprimento fixo de 25 caracteres.
+
+    sigla_tribunal: SIGLAS_TRIBUNAIS_DISPONIVEIS
+    # Sigla do tribunal que pertence ao processo,
+    # deve estar na lista de siglas disponíveis.
 
     @model_validator(mode="before")
     def valida_numero_processo(self):

@@ -51,7 +51,7 @@ def handle_invalid_parameter_error(request, exc):
 
 
 @app.post("/consulta-processo", response_model=ConsultaProcessoOutput, responses=ConsultaProcessoResponses.responses())
-async def consulta_processo(payload: ConsultaProcessoInput = Depends()):
+async def consulta_processo(payload: ConsultaProcessoInput):
     """
     Recebe uma solicitação de consulta de processo e a coloca na fila para processamento.
     """
