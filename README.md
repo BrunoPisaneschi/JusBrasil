@@ -10,13 +10,12 @@ Desafio técnico proposto pela equipe do JusBrasil, que consiste em uma API capa
 - Lista das movimentações (data e movimento)
 
 ## Execução
-Crie uma virtual env ou instale diretamente no seu Python global a lib `invoke` com o comando abaixo.
+Crie uma virtual env ou instale diretamente no seu Python global todo o conteúdo do `requirements-dev.txt`.
 ```shell
-pip install invoke==2.2.0
+pip install -r requirements-dev.txt
 ```
 
-Essa lib esta dentro do requirements-dev, porém, apenas ela é necessaria fora do docker. 
-Caso não queira, é possivel visualizar os comandos utilizados no arquivo `tasks.py` e reproduzí-los manualmente.
+Esse passo é necessário para que o `invoke` e as libs de testes estejam devidamente configuradas, podendo usar os comandos listados no README.
 
 O projeto está configurado para ser executado no docker, então basta rodar o seguinte comando
 ```shell
